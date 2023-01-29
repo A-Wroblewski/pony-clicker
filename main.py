@@ -9,7 +9,7 @@ window.geometry('800x600')
 window.rowconfigure([0, 1], weight=1, minsize=200)
 window.columnconfigure([0, 5], weight=1, minsize=400)
 
-window_icon = tk.PhotoImage(file='Pony Clicker\\mlp_logo.png')
+window_icon = tk.PhotoImage(file='mlp_logo.png')
 window.iconphoto(True, window_icon)
 
 #################################################################################################################################
@@ -61,7 +61,7 @@ def buy_cider(*args):
 #                                                         funções acima                                                         #
 #################################################################################################################################
 
-bits_image = tk.PhotoImage(file='Pony Clicker\\poneis.png')
+bits_image = tk.PhotoImage(file='poneis.png')
 bits_image = bits_image.subsample(15, 15)
 
 bits_image_label = tk.Label(image=bits_image)
