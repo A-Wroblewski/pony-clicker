@@ -118,8 +118,6 @@ bits_text.grid(row=0, column=2)
 bits_image = tk.PhotoImage(file='poneis.png')
 bits_image = bits_image.subsample(15, 15)
 
-bits_image_label = tk.Label(image=bits_image)
-
 bits_image_button = tk.Button(image=bits_image, command=bits_image_click)
 bits_image_button.grid(row=1, column=1, columnspan=2)
 
