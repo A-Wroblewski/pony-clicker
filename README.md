@@ -1,3 +1,3 @@
 # Pony Clicker
 
-Joguinho besta estilo Cookie Clicker. Ainda incompleto.
+Cookie Clicker do paraguai. Ainda incompleto.
