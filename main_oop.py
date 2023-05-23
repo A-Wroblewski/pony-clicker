@@ -1,22 +1,117 @@
 import math
+import json
 import tkinter as tk
 from tkinter import messagebox
 
 class PonyClicker:
     def __init__(self):
         self.window = tk.Tk()
-        self.bits = 0
 
-        self.hooves = 1
-        self.hooves_cost = 10
+        with open('game_data.json', 'r', encoding='utf-8') as file:
+            data = json.load(file)
 
-        self.cider = 0
-        self.cider_cost = 15
-        self.cider_per_second = 0
+        self.bits = data['bits']
 
-        self.amulet = 0
-        self.amulet_cost = 15
-        self.amulet_per_second = 0
+        self.hooves = data['hooves']
+        self.hooves_cost = data['hooves_cost']
+
+        self.cider = data['cider']
+        self.cider_cost = data['cider_cost']
+        self.cider_per_second = data['cider_per_second']
+
+        self.amulet = data['amulet']
+        self.amulet_cost = data['amulet_cost']
+        self.amulet_per_second = data['amulet_per_second']
+
+
+    def set_up_window(self):
+        window = self.window
+
+        window.title('Pony Clicker')
+
+        # define o ícone do programa
+        window_icon = tk.PhotoImage(file='mlp_logo.png')
+        window.iconphoto(True, window_icon)
+
+        # pega a resolução do monitor
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+
+        # resolução que eu quero que o jogo fique
+        window_width = 912
+        window_height = 684
+
+        # conta malusquia pra deixar o programa centralizado na tela
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+
+        # monta a geometria centralizando o programa na tela e desliga o redimensionamento
+        window.geometry(f'{window_width}x{window_height}+{x}+{y}')
+        window.resizable(0, 0)
+
+        window.rowconfigure([0, 1], weight=1)
+        window.columnconfigure([0, 1, 2], weight=1)
+
+
+    def set_up_menus(self):
+        window = self.window
+
+        window.option_add('*tearOff', False)  # desliga a opção de destacar o menu em uma nova janela
+
+        menu_bar = tk.Menu(window)
+        window['menu'] = menu_bar
+
+        options_menu = tk.Menu(menu_bar)
+
+        menu_bar.add_cascade(menu=options_menu, label='Opções')
+        options_menu.add_command(label='Salvar', command=self.save_game)
+        options_menu.add_command(label='Resetar progresso', command=self.reset_game)
+
+        menu_bar.add_command(label='Sair', command=self.quit_game)
+
+
+    def save_game(self):
+        data = {
+            'bits': self.bits,
+            'hooves': self.hooves,
+            'hooves_cost': self.hooves_cost,
+            'cider': self.cider,
+            'cider_cost': self.cider_cost,
+            'cider_per_second': self.cider_per_second,
+            'amulet': self.amulet,
+            'amulet_cost': self.amulet_cost,
+            'amulet_per_second': self.amulet_per_second,
+        }
+
+        with open('game_data.json', 'w', encoding='utf-8') as file:
+            json.dump(data, file, indent=2)
+
+
+    def reset_game(self):
+        confirmation = messagebox.askyesno(
+            message='Tem certeza que deseja recomeçar do zero?\nTODO o progresso será perdido.',
+            title='Recomeçar jogo'
+        )
+
+        if confirmation:
+            data = {
+                'bits': 0,
+                'hooves': 1,
+                'hooves_cost': 10,
+                'cider': 0,
+                'cider_cost': 15,
+                'cider_per_second': 0,
+                'amulet': 0,
+                'amulet_cost': 15,
+                'amulet_per_second': 0,
+            }
+
+            with open('game_data.json', 'w', encoding='utf-8') as file:
+                json.dump(data, file, indent=2)
+
+            self.window.destroy()
+            restart = PonyClicker()
+            restart.create_ui()
 
 
     def quit_game(self):
@@ -28,6 +123,9 @@ class PonyClicker:
 
 
     def create_ui(self):
+        self.set_up_window()
+        self.set_up_menus()
+
         window = self.window
         bits = self.bits
         hooves = self.hooves
@@ -43,60 +141,27 @@ class PonyClicker:
         #                                                  pegando todos os self acima                                                  #
         #################################################################################################################################
 
-        window.title('Pony Clicker')
-
-        window_icon = tk.PhotoImage(file='mlp_logo.png')
-        window.iconphoto(True, window_icon)
-
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-
-        window_width = 912
-        window_height = 684
-
-        x = (screen_width - window_width) // 2
-        y = (screen_height - window_height) // 2
-
-        window.geometry(f'{window_width}x{window_height}+{x}+{y}')
-        window.resizable(0, 0)
-
-        window.rowconfigure([0, 1], weight=1)
-        window.columnconfigure([0, 1, 2], weight=1)
-
-        #################################################################################################################################
-        #                                                 configurações da janela acima                                                 #
-        #################################################################################################################################
-
-        window.option_add('*tearOff', False)  # desliga a opção de destacar o menu em uma nova janela
-
-        menu_bar = tk.Menu(window)
-        window['menu'] = menu_bar
-
-        options_menu = tk.Menu(menu_bar)
-
-        menu_bar.add_cascade(menu=options_menu, label='Opções')
-        options_menu.add_command(label='Salvar', command=...)
-
-        menu_bar.add_command(label='Sair', command=self.quit_game)
-
-        #################################################################################################################################
-        #                                                 configurações dos menus acima                                                 #
-        #################################################################################################################################
+        # aqui nas funções tá cheio de self pra poder usar no salvamento
 
         def bits_image_click(*args):
             bits_label['text'] += hooves
+            self.bits += hooves
 
 
         def bits_per_second_from_cider(*args):
             cider_per_second = 1
+
             bits_label['text'] += cider_per_second
+            self.bits += cider_per_second
 
             window.after(1000, bits_per_second_from_cider)
 
 
         def bits_per_second_from_amulet(*args):
             amulet_per_second = 2
+
             bits_label['text'] += amulet_per_second
+            self.bits += amulet_per_second
 
             window.after(1000, bits_per_second_from_amulet)
 
@@ -106,11 +171,16 @@ class PonyClicker:
 
             if bits_label['text'] >= hooves_cost:
                 bits_label['text'] -= hooves_cost
+                self.bits -= hooves_cost
+
                 hooves += 1
+                self.hooves = hooves
+
                 total_hooves_label['text'] = hooves
 
                 hooves_cost = math.floor(hooves_cost * 1.5)
                 hooves_cost_label['text'] = hooves_cost
+                self.hooves_cost = hooves_cost
 
 
         def buy_cider(*args):
@@ -118,13 +188,20 @@ class PonyClicker:
 
             if bits_label['text'] >= cider_cost:
                 bits_label['text'] -= cider_cost
+                self.bits -= cider_cost
+
                 cider += 1
+                self.cider = cider
+
                 total_cider_label['text'] = cider
+
                 cider_per_second += 1
                 cider_per_second_label['text'] = cider_per_second
+                self.cider_per_second = cider_per_second
 
                 cider_cost = math.floor(cider_cost * 1.3)
                 cider_cost_label['text'] = cider_cost
+                self.cider_cost = cider_cost
 
                 window.after(1000, bits_per_second_from_cider)
 
@@ -134,13 +211,20 @@ class PonyClicker:
 
             if bits_label['text'] >= amulet_cost:
                 bits_label['text'] -= amulet_cost
+                self.bits -= amulet_cost
+
                 amulet += 1
+                self.amulet = amulet
+
                 total_amulet_label['text'] = amulet
+
                 amulet_per_second += 2
                 amulet_per_second_label['text'] = amulet_per_second
+                self.amulet_per_second = amulet_per_second
 
                 amulet_cost = math.floor(amulet_cost * 1.2)
                 amulet_cost_label['text'] = amulet_cost
+                self.amulet_cost = amulet_cost
 
                 window.after(1000, bits_per_second_from_amulet)
 

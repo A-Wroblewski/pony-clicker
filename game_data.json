@@ -1,0 +1,11 @@
+{
+  "bits": 0,
+  "hooves": 1,
+  "hooves_cost": 10,
+  "cider": 0,
+  "cider_cost": 15,
+  "cider_per_second": 0,
+  "amulet": 0,
+  "amulet_cost": 15,
+  "amulet_per_second": 0
+}
