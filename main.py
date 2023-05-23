@@ -148,24 +148,6 @@ class PonyClicker:
             self.bits += hooves
 
 
-        def bits_per_second_from_cider(*args):
-            cider_per_second = 1
-
-            bits_label['text'] += cider_per_second
-            self.bits += cider_per_second
-
-            window.after(1000, bits_per_second_from_cider)
-
-
-        def bits_per_second_from_amulet(*args):
-            amulet_per_second = 2
-
-            bits_label['text'] += amulet_per_second
-            self.bits += amulet_per_second
-
-            window.after(1000, bits_per_second_from_amulet)
-
-
         def buy_hooves(*args):
             nonlocal hooves, hooves_cost
 
@@ -181,6 +163,15 @@ class PonyClicker:
                 hooves_cost = math.floor(hooves_cost * 1.5)
                 hooves_cost_label['text'] = hooves_cost
                 self.hooves_cost = hooves_cost
+
+
+        def bits_per_second_from_cider(*args):
+            cider_per_second = 1
+
+            bits_label['text'] += cider_per_second
+            self.bits += cider_per_second
+
+            window.after(1000, bits_per_second_from_cider)
 
 
         def buy_cider(*args):
@@ -199,11 +190,20 @@ class PonyClicker:
                 cider_per_second_label['text'] = cider_per_second
                 self.cider_per_second = cider_per_second
 
-                cider_cost = math.floor(cider_cost * 1.3)
+                cider_cost = math.floor(cider_cost * 1.2)
                 cider_cost_label['text'] = cider_cost
                 self.cider_cost = cider_cost
 
                 window.after(1000, bits_per_second_from_cider)
+
+
+        def bits_per_second_from_amulet(*args):
+            amulet_per_second = 2
+
+            bits_label['text'] += amulet_per_second
+            self.bits += amulet_per_second
+
+            window.after(1000, bits_per_second_from_amulet)
 
 
         def buy_amulet(*args):
@@ -222,7 +222,7 @@ class PonyClicker:
                 amulet_per_second_label['text'] = amulet_per_second
                 self.amulet_per_second = amulet_per_second
 
-                amulet_cost = math.floor(amulet_cost * 1.2)
+                amulet_cost = math.floor(amulet_cost * 1.3)
                 amulet_cost_label['text'] = amulet_cost
                 self.amulet_cost = amulet_cost
 
@@ -365,6 +365,13 @@ class PonyClicker:
         #################################################################################################################################
         #                                                   frame das melhorias acima                                                   #
         #################################################################################################################################
+
+        # for pra resumir as funções quando reabrir o programa após salvar
+        for _ in range(self.cider):
+            bits_per_second_from_cider()
+
+        for _ in range(self.amulet):
+            bits_per_second_from_amulet()
 
         window.mainloop()
 
