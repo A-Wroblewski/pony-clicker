@@ -1,11 +1,11 @@
 {
-  "bits": 0,
-  "hooves": 1,
-  "hooves_cost": 10,
-  "cider": 0,
-  "cider_cost": 15,
-  "cider_per_second": 0,
-  "amulet": 0,
-  "amulet_cost": 15,
-  "amulet_per_second": 0
+  "bits": 1650,
+  "hooves": 15,
+  "hooves_cost": 2776,
+  "cider": 20,
+  "cider_cost": 523,
+  "cider_per_second": 20,
+  "amulet": 15,
+  "amulet_cost": 696,
+  "amulet_per_second": 30
 }
