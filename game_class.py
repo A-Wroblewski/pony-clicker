@@ -1,15 +1,16 @@
-import json
 import math
 import tkinter as tk
 
 from tkinter import messagebox
+
+from game_data import GameData
 
 
 class PonyClicker:
     def __init__(self):
         self.window = tk.Tk()
 
-        data = self._load_data()
+        data = GameData.load()
 
         self.bits = data['bits']
 
@@ -23,25 +24,6 @@ class PonyClicker:
         self.amulet = data['amulet']
         self.amulet_cost = data['amulet_cost']
         self.amulet_per_second = data['amulet_per_second']
-
-    # quantidade de itens e preços iniciais do jogo
-    def _initial_values(self):
-        return {
-            'bits': 0,
-            'hooves': 1,
-            'hooves_cost': 10,
-            'cider': 0,
-            'cider_cost': 15,
-            'cider_per_second': 0,
-            'amulet': 0,
-            'amulet_cost': 15,
-            'amulet_per_second': 0,
-        }
-
-    def _load_data(self):
-        with open('game_data.json', 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            return data
 
     def _set_up_resolution(self, window):
         # pega a resolução do monitor
@@ -71,7 +53,7 @@ class PonyClicker:
         self._set_up_resolution(window)
         self._set_up_icon(window)
 
-        window.resizable(0, 0)
+        window.resizable(False, False)
 
         window.rowconfigure([0, 1], weight=1)
         window.columnconfigure([0, 1, 2], weight=1)
@@ -93,36 +75,33 @@ class PonyClicker:
 
         menu_bar.add_command(label='Sair', command=self._quit_game)
 
-    # sobrescreve os dados tanto pra salvar o jogo quanto pra resetar
-    def _dump_data(self, data):
-        with open('game_data.json', 'w', encoding='utf-8') as file:
-            json.dump(data, file, indent=2)
-
     def _save_game(self):
         # cria uma cópia do __dict__ pra remover a chave "window" e salvar os dados
         data = self.__dict__.copy()
-        data.pop('window', None)
+        data.pop('window')
 
-        self._dump_data(data)
+        GameData.save(data)
 
     def _reset_game(self):
         confirmation = messagebox.askyesno(
-            message='Tem certeza que deseja recomeçar do zero?\nTODO o progresso será perdido.',
+            message='Tem certeza que deseja recomeçar do zero?\n' \
+            'TODO o progresso será perdido.',
             title='Recomeçar jogo'
         )
 
         if confirmation:
-            data = self._initial_values()
+            initial_values = GameData.initial_values()
 
-            self._dump_data(data)
+            GameData.save(initial_values)
 
             self.window.destroy()
             restart = PonyClicker()
-            restart._create_ui()
+            restart.create_ui()
 
     def _quit_game(self):
         confirmation = messagebox.askyesno(
-            message='Tem certeza que deseja sair?\nTodo o progresso não salvo será perdido.',
+            message='Tem certeza que deseja sair?\n' \
+            'Todo o progresso não salvo será perdido.',
             title='Sair do jogo')
 
         if confirmation: self.window.destroy()
@@ -131,38 +110,20 @@ class PonyClicker:
         self._set_up_window()
         self._set_up_menus()
 
-        window = self.window
-        bits = self.bits
-        hooves = self.hooves
-        hooves_cost = self.hooves_cost
-        cider = self.cider
-        cider_cost = self.cider_cost
-        cider_per_second = self.cider_per_second
-        amulet = self.amulet
-        amulet_cost = self.amulet_cost
-        amulet_per_second = self.amulet_per_second
-
-        # aqui nas funções tá cheio de self pra poder usar no salvamento
-
         def _bits_image_click(*args):
-            bits_label['text'] += hooves
-            self.bits += hooves
+            bits_label['text'] += self.hooves
+            self.bits += self.hooves
 
         def _buy_hooves(*args):
-            nonlocal hooves, hooves_cost
+            if bits_label['text'] >= self.hooves_cost:
+                bits_label['text'] -= self.hooves_cost
+                self.bits -= self.hooves_cost
 
-            if bits_label['text'] >= hooves_cost:
-                bits_label['text'] -= hooves_cost
-                self.bits -= hooves_cost
+                self.hooves += 1
+                total_hooves_label['text'] = self.hooves
 
-                hooves += 1
-                self.hooves = hooves
-
-                total_hooves_label['text'] = hooves
-
-                hooves_cost = math.floor(hooves_cost * 1.5)
-                hooves_cost_label['text'] = hooves_cost
-                self.hooves_cost = hooves_cost
+                self.hooves_cost = math.floor(self.hooves_cost * 1.5)
+                hooves_cost_label['text'] = self.hooves_cost
 
         def _bits_per_second_from_cider(*args):
             cider_per_second = 1
@@ -170,29 +131,23 @@ class PonyClicker:
             bits_label['text'] += cider_per_second
             self.bits += cider_per_second
 
-            window.after(1000, _bits_per_second_from_cider)
+            self.window.after(1000, _bits_per_second_from_cider)
 
         def _buy_cider(*args):
-            nonlocal cider, cider_cost, cider_per_second
+            if bits_label['text'] >= self.cider_cost:
+                bits_label['text'] -= self.cider_cost
+                self.bits -= self.cider_cost
 
-            if bits_label['text'] >= cider_cost:
-                bits_label['text'] -= cider_cost
-                self.bits -= cider_cost
+                self.cider += 1
+                total_cider_label['text'] = self.cider
 
-                cider += 1
-                self.cider = cider
+                self.cider_per_second += 1
+                cider_per_second_label['text'] = self.cider_per_second
 
-                total_cider_label['text'] = cider
+                self.cider_cost = math.floor(self.cider_cost * 1.2)
+                cider_cost_label['text'] = self.cider_cost
 
-                cider_per_second += 1
-                cider_per_second_label['text'] = cider_per_second
-                self.cider_per_second = cider_per_second
-
-                cider_cost = math.floor(cider_cost * 1.2)
-                cider_cost_label['text'] = cider_cost
-                self.cider_cost = cider_cost
-
-                window.after(1000, _bits_per_second_from_cider)
+                self.window.after(1000, _bits_per_second_from_cider)
 
         def _bits_per_second_from_amulet(*args):
             amulet_per_second = 2
@@ -200,35 +155,29 @@ class PonyClicker:
             bits_label['text'] += amulet_per_second
             self.bits += amulet_per_second
 
-            window.after(1000, _bits_per_second_from_amulet)
+            self.window.after(1000, _bits_per_second_from_amulet)
 
         def _buy_amulet(*args):
-            nonlocal amulet, amulet_cost, amulet_per_second
+            if bits_label['text'] >= self.amulet_cost:
+                bits_label['text'] -= self.amulet_cost
+                self.bits -= self.amulet_cost
 
-            if bits_label['text'] >= amulet_cost:
-                bits_label['text'] -= amulet_cost
-                self.bits -= amulet_cost
+                self.amulet += 1
+                total_amulet_label['text'] = self.amulet
 
-                amulet += 1
-                self.amulet = amulet
+                self.amulet_per_second += 2
+                amulet_per_second_label['text'] = self.amulet_per_second
 
-                total_amulet_label['text'] = amulet
+                self.amulet_cost = math.floor(self.amulet_cost * 1.3)
+                amulet_cost_label['text'] = self.amulet_cost
 
-                amulet_per_second += 2
-                amulet_per_second_label['text'] = amulet_per_second
-                self.amulet_per_second = amulet_per_second
-
-                amulet_cost = math.floor(amulet_cost * 1.3)
-                amulet_cost_label['text'] = amulet_cost
-                self.amulet_cost = amulet_cost
-
-                window.after(1000, _bits_per_second_from_amulet)
+                self.window.after(1000, _bits_per_second_from_amulet)
 
         #################################################################################################################################
         #                                                         funções acima                                                         #
         #################################################################################################################################
 
-        bits_label = tk.Label(text=bits)
+        bits_label = tk.Label(text=self.bits)
         bits_label.grid(row=0, column=1)
 
         bits_text = tk.Label(text='bits')
@@ -265,7 +214,7 @@ class PonyClicker:
                                       bg='yellow',
                                       activebackground='yellow',
                                       command=_buy_hooves)
-        
+
         hooves_buy_button.grid(row=0, column=1, padx=10, pady=5)
 
         # campo da palavra "custo"
@@ -273,7 +222,7 @@ class PonyClicker:
         hooves_cost_text.grid(row=0, column=2)
 
         # campo do custo do item
-        hooves_cost_label = tk.Label(master=items_frame, text=hooves_cost, bg='pink')
+        hooves_cost_label = tk.Label(master=items_frame, text=self.hooves_cost, bg='pink')
         hooves_cost_label.grid(row=0, column=3, padx=5)
 
         # campo do texto do total comprado do item
@@ -281,7 +230,7 @@ class PonyClicker:
         total_hooves_text.grid(row=1, column=0, padx=5)
 
         # campo do total comprado do item
-        total_hooves_label = tk.Label(master=items_frame, text=hooves, bg='pink')
+        total_hooves_label = tk.Label(master=items_frame, text=self.hooves, bg='pink')
         total_hooves_label.grid(row=1, column=1)
 
         #################################################################################################################################
@@ -298,7 +247,7 @@ class PonyClicker:
                                      bg='yellow',
                                      activebackground='yellow',
                                      command=_buy_cider)
-        
+
         cider_buy_button.grid(row=2, column=1, padx=10, pady=5)
 
         # campo da palavra "custo"
@@ -306,7 +255,7 @@ class PonyClicker:
         cider_cost_text.grid(row=2, column=2)
 
         # campo do custo do item
-        cider_cost_label = tk.Label(master=items_frame, text=cider_cost, bg='pink')
+        cider_cost_label = tk.Label(master=items_frame, text=self.cider_cost, bg='pink')
         cider_cost_label.grid(row=2, column=3, padx=5)
 
         # campo do texto do total comprado do item
@@ -314,7 +263,7 @@ class PonyClicker:
         total_cider_text.grid(row=3, column=0, padx=5)
 
         # campo do total comprado do item
-        total_cider_label = tk.Label(master=items_frame, text=cider, bg='pink')
+        total_cider_label = tk.Label(master=items_frame, text=self.cider, bg='pink')
         total_cider_label.grid(row=3, column=1)
 
         # campo do texto de bits por segundo ganhos pelo item
@@ -322,7 +271,7 @@ class PonyClicker:
         cider_per_second_text.grid(row=4, column=0, padx=5)
 
         # campo da quantidade de bits por segundo ganhos pelo item
-        cider_per_second_label = tk.Label(master=items_frame, text=cider_per_second, bg='pink')
+        cider_per_second_label = tk.Label(master=items_frame, text=self.cider_per_second, bg='pink')
         cider_per_second_label.grid(row=4, column=1)
 
         #################################################################################################################################
@@ -339,7 +288,7 @@ class PonyClicker:
                                       bg='yellow',
                                       activebackground='yellow',
                                       command=_buy_amulet)
-        
+
         amulet_buy_button.grid(row=5, column=1, padx=10, pady=5)
 
         # campo da palavra "custo"
@@ -347,7 +296,7 @@ class PonyClicker:
         amulet_cost_text.grid(row=5, column=2)
 
         # campo do custo do item
-        amulet_cost_label = tk.Label(master=items_frame, text=amulet_cost, bg='pink')
+        amulet_cost_label = tk.Label(master=items_frame, text=self.amulet_cost, bg='pink')
         amulet_cost_label.grid(row=5, column=3, padx=5)
 
         # campo do texto do total comprado do item
@@ -355,7 +304,7 @@ class PonyClicker:
         total_amulet_text.grid(row=6, column=0, padx=5)
 
         # campo do total comprado do item
-        total_amulet_label = tk.Label(master=items_frame, text=amulet, bg='pink')
+        total_amulet_label = tk.Label(master=items_frame, text=self.amulet, bg='pink')
         total_amulet_label.grid(row=6, column=1)
 
         # campo do texto de bits por segundo ganhos pelo item
@@ -363,7 +312,7 @@ class PonyClicker:
         amulet_per_second_text.grid(row=7, column=0, padx=5)
 
         # campo da quantidade de bits por segundo ganhos pelo item
-        amulet_per_second_label = tk.Label(master=items_frame, text=amulet_per_second, bg='pink')
+        amulet_per_second_label = tk.Label(master=items_frame, text=self.amulet_per_second, bg='pink')
         amulet_per_second_label.grid(row=7, column=1)
 
         #################################################################################################################################
@@ -384,4 +333,4 @@ class PonyClicker:
         for _ in range(self.amulet):
             _bits_per_second_from_amulet()
 
-        window.mainloop()
+        self.window.mainloop()
